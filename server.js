@@ -1,11 +1,32 @@
 var express = require('express');
 var app = express();
 
-app.use(function (req, res, next) {
-  console.log("== Got a request:");
-  console.log("  -- URL:", req.url);
-  console.log("  -- method:", req.method);
-  next();
+var logger = require('./logger');
+
+app.use(logger);
+
+app.use(express.static('public'));
+
+app.get('/people', function (req, res, next) {
+  res.status(200).sendFile(__dirname + '/public/people.html');
+});
+
+var availablePeople = [
+  'beyonce',
+  'einstein',
+  'luke',
+  'marie',
+  'ta-nehisi'
+];
+app.get('/people/:person', function (req, res, next) {
+  var person = req.params.person.toLowerCase();
+  if (availablePeople.indexOf(person) >= 0) {
+    res.status(200).sendFile(
+      __dirname + '/public/people/' + person + '.html'
+    );
+  } else {
+    next();
+  }
 });
 
 app.get('/', function (req, res, next) {
